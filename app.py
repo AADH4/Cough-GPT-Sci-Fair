@@ -8,7 +8,7 @@ import os
 # === Load Model ===
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model("model.h5")  # or "model.keras"
+    model = tf.keras.models.load_model("lung_sound_classifier.keras")  # or "model.keras"
     return model
 
 model = load_model()
