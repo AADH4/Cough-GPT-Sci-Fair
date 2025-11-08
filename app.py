@@ -7,7 +7,7 @@ st.title("🩺 Lung Sound Classifier")
 st.write("Upload a `.wav` file to classify it as **Healthy** or **Abnormal**.")
 
 # -----------------------------
-# Load model (cached for speed)
+# Load model (cached)
 # -----------------------------
 @st.cache_resource
 def load_model():
@@ -16,18 +16,24 @@ def load_model():
 model = load_model()
 
 # -----------------------------
-# Preprocess audio
+# Preprocess audio correctly
 # -----------------------------
 def preprocess_audio(file_path, target_sr=16000):
     y, sr = librosa.load(file_path, sr=target_sr)
-    mel = librosa.feature.melspectrogram(y=y, sr=target_sr, n_mels=64)
-    mel_db = librosa.power_to_db(mel, ref=np.max)
-    mel_db = tf.image.resize(mel_db[..., np.newaxis], [64, 94])  # shape (64, 94, 1)
-    X = np.expand_dims(mel_db, axis=0).astype(np.float32)
+
+    # If longer than 1024 samples, take first 1024
+    # If shorter, pad with zeros
+    if len(y) > 1024:
+        y = y[:1024]
+    else:
+        y = np.pad(y, (0, max(0, 1024 - len(y))))
+
+    # Reshape for model: (1, 1024)
+    X = np.expand_dims(y, axis=0).astype(np.float32)
     return X
 
 # -----------------------------
-# File upload section
+# File upload + prediction
 # -----------------------------
 uploaded_file = st.file_uploader("Upload a WAV file", type=["wav"])
 
@@ -40,12 +46,12 @@ if uploaded_file is not None:
         preds = model.predict(X)
 
         # -----------------------------
-        # ✅ Step 1: Threshold-based decision
+        # ✅ Step 1: Threshold-based classification
         # -----------------------------
-        abnormal_prob = float(preds[0][0])  # assuming [Abnormal, Healthy]
+        abnormal_prob = float(preds[0][0])  # assuming output = [abnormal, healthy]
         healthy_prob = float(preds[0][1])
 
-        threshold = 0.6  # tune this value if needed
+        threshold = 0.6
 
         if healthy_prob >= threshold:
             label = "Healthy"
@@ -58,7 +64,6 @@ if uploaded_file is not None:
         st.write(f"Confidence: {confidence:.2f}")
         st.write(f"(Abnormal={abnormal_prob:.2f}, Healthy={healthy_prob:.2f})")
 
-        # Optional: play the uploaded audio
         st.audio(uploaded_file, format="audio/wav")
 
     except Exception as e:
