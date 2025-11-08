@@ -61,8 +61,6 @@ if uploaded_file is not None:
             confidence = abnormal_prob
 
         st.success(f"Prediction: **{label}**")
-        st.write(f"Confidence: {confidence:.2f}")
-        st.write(f"(Abnormal={abnormal_prob:.2f}, Healthy={healthy_prob:.2f})")
 
         st.audio(uploaded_file, format="audio/wav")
 
