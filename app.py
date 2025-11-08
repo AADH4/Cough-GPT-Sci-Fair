@@ -49,6 +49,7 @@ def get_gemini_advice(label, confidence):
     Keep it professional but friendly.
     Avoid medical claims. Encourage doctor visits if needed.
     Provide good reccomendations for the scenario and what the user should do, make sure to emphasize that this is not fully diagnostic but provides a prediction. 
+    Don't sound super indecisive, for example if the model predicts abnormality, suggest the user should go to a doctor or take over-the-counter medication, while if it predicts healthy, just provide standard cold recovery steps or none at all. 
     """
 
     model = genai.GenerativeModel("gemini-2.5-flash")
@@ -80,7 +81,7 @@ if uploaded_file is not None:
             confidence = abnormal_prob
 
         st.audio(uploaded_file, format="audio/wav")
-        st.success(f"Prediction: **{label}** ({confidence:.2f})")
+        st.success(f"Prediction: **{label}**")
 
         # -----------------------------
         # Gemini-generated recommendation
