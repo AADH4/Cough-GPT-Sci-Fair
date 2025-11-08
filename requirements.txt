@@ -4,3 +4,4 @@ tensorflow-hub
 librosa
 numpy
 soundfile
+genai
