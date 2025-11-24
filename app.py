@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import librosa
 import tensorflow as tf
-import google.generativeai as genai i
+import google.generativeai as genai
 # ----------------------------
 # STREAMLIT PAGE CONFIG
 # ----------------------------
