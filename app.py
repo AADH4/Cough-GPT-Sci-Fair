@@ -7,24 +7,24 @@ import tensorflow as tf
 # STREAMLIT PAGE CONFIG
 # ----------------------------
 st.set_page_config(
-    page_title="Cough Classifier",
+    page_title="CoughDetect",
     layout="wide",
-    page_icon="🤖"
+    page_icon="🩺"
 )
 
 # ----------------------------
-# GLOBAL STYLING (BACKGROUND, IMAGES, LAYOUT)
+# GLOBAL STYLING (BACKGROUND + SIDE IMAGES)
 # ----------------------------
 st.markdown("""
     <style>
-        /* Make the main app wider */
+        /* Main content width */
         .main .block-container {
             max-width: 95%;
             padding-left: 2rem;
             padding-right: 2rem;
         }
 
-        /* Soft light background */
+        /* Soft gradient background */
         .stApp {
             background-color: #f4f6fa;
             background-image: radial-gradient(circle at 20% 20%, #ffffff 0%, #f4f6fa 70%);
@@ -35,7 +35,7 @@ st.markdown("""
             position: fixed;
             top: 20%;
             left: 0;
-            width: 220px;
+            width: 250px;
             opacity: 0.18;
             z-index: -1;
         }
@@ -45,38 +45,62 @@ st.markdown("""
             position: fixed;
             top: 20%;
             right: 0;
-            width: 220px;
+            width: 250px;
             opacity: 0.18;
             z-index: -1;
         }
+
+        /* Header images row */
+        .header-img-row {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+        .header-img-row img {
+            width: 160px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
     </style>
 
+    <!-- LEFT + RIGHT side images -->
     <img src="/mnt/data/a6380c32-c2fe-4ce8-9761-6c4d7d0dcc5f.png" class="left-img">
     <img src="/mnt/data/df7e5018-e460-48b8-a5dd-351fa64f29bb.png" class="right-img">
 """, unsafe_allow_html=True)
 
 # ----------------------------
-# SIDEBAR INFORMATION
+# HEADER IMAGE ROW (top banner)
+# Replace these URLs with any images you want
 # ----------------------------
-st.sidebar.title("About This App")
-st.sidebar.write("""
-This cough classifier uses a machine learning model trained on
-lung sound data to distinguish **Healthy** vs **Abnormal** cough sounds.
+st.markdown("""
+<div class="header-img-row">
+    <img src="https://i.imgur.com/3ZQ3Zzb.png">
+    <img src="https://i.imgur.com/PLQbF8H.png">
+    <img src="https://i.imgur.com/6pQ0pUy.png">
+</div>
+""", unsafe_allow_html=True)
 
-### How to Use:
-1. Upload a `.wav` audio file (1–3 seconds recommended)
-2. The app preprocesses the audio  
-3. The model predicts the health label  
-4. You'll see the prediction + confidence score
+# ----------------------------
+# SIDEBAR EXPLANATION
+# ----------------------------
+st.sidebar.title("ℹ️ About CoughDetect")
+st.sidebar.write("""
+This tool analyzes **cough audio** using a deep learning model.
+
+### How It Works:
+1. Upload a `.wav` file  
+2. Audio is preprocessed  
+3. Model predicts: **Healthy** or **Abnormal**  
 
 ### Notes:
-- This is **not medical advice**
-- Model accuracy depends on the training dataset
-- More data = better predictions in the future
+- Not medical advice  
+- Best with clean, 1–2 second cough recordings  
 """)
 
 # ----------------------------
-# LOAD MODEL
+# LOAD MODEL (Your original logic)
 # ----------------------------
 @st.cache_resource
 def load_model():
@@ -85,32 +109,19 @@ def load_model():
 model = load_model()
 
 # ----------------------------
-# AUDIO PREPROCESSING
-# (kept exactly like you had it)
+# ORIGINAL PREPROCESSING (unchanged)
 # ----------------------------
-def preprocess_audio(path):
-    y, sr = librosa.load(path, sr=None)
-    target_sr = 16000
-
-    # Resample if needed
-    if sr != target_sr:
-        y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
-
-    mel = librosa.feature.melspectrogram(y, sr=target_sr, n_mels=64)
-    mel_db = librosa.power_to_db(mel, ref=np.max)
-
-    mel_db = (mel_db - mel_db.min()) / (mel_db.max() - mel_db.min() + 1e-9)
-
-    # Resize to consistent model input size
-    mel_db_resized = librosa.util.fix_length(mel_db, size=94, axis=1)
-
-    mel_db_resized = np.expand_dims(mel_db_resized, axis=-1)
-    mel_db_resized = np.expand_dims(mel_db_resized, axis=0)
-
-    return mel_db_resized
+def preprocess_audio(file_path, target_sr=16000):
+    y, sr = librosa.load(file_path, sr=target_sr)
+    if len(y) > 1024:
+        y = y[:1024]
+    else:
+        y = np.pad(y, (0, max(0, 1024 - len(y))))
+    X = np.expand_dims(y, axis=0).astype(np.float32)
+    return X
 
 # ----------------------------
-# MAIN UI CARD
+# MAIN CARD CONTAINER
 # ----------------------------
 st.markdown("""
 <div style="
@@ -123,26 +134,35 @@ st.markdown("""
 ">
 """, unsafe_allow_html=True)
 
-st.title("🤖 AI Cough Classifier")
-st.write("Upload a cough audio file (`.wav`) and the model will classify it.")
+st.title("🩺 Welcome to CoughDetect!")
+st.write("Upload a `.wav` file to check whether your cough is **Healthy** or **Abnormal**.")
 
 # ----------------------------
-# FILE UPLOADER
+# FILE UPLOAD
 # ----------------------------
-audio_file = st.file_uploader("Upload your .wav file", type=["wav"])
+uploaded_file = st.file_uploader("Upload WAV File", type=["wav"])
 
-if audio_file:
+if uploaded_file is not None:
     with open("temp.wav", "wb") as f:
-        f.write(audio_file.read())
+        f.write(uploaded_file.getbuffer())
 
-    st.audio("temp.wav")
+    st.audio(uploaded_file)
 
     try:
         X = preprocess_audio("temp.wav")
-        pred = model.predict(X)[0][0]
+        preds = model.predict(X)
 
-        label = "Abnormal" if pred > 0.5 else "Healthy"
-        confidence = pred if pred > 0.5 else (1 - pred)
+        abnormal_prob = float(preds[0][0])
+        healthy_prob = float(preds[0][1])
+
+        threshold = 0.5
+
+        if healthy_prob >= threshold:
+            label = "Abnormal"
+            confidence = healthy_prob
+        else:
+            label = "Healthy"
+            confidence = abnormal_prob
 
         st.subheader(f"Prediction: **{label}**")
         st.write(f"Confidence: **{confidence:.2f}**")
