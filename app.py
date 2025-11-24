@@ -11,7 +11,7 @@ st.write("Upload a `.wav` file to classify it as **Healthy** or **Abnormal**, th
 # -----------------------------
 # Configure Gemini
 # -----------------------------
-genai.configure(api_key="AIzaSyD4NkDZ6QZUDZvD_KOgLRpin1NXjp-6LlI")
+genai.configure(api_key="AIzaSyDloja-gMt9Ix8VqdmQVqMLodZzKnqDRYg")
 
 # -----------------------------
 # Load model (cached)
