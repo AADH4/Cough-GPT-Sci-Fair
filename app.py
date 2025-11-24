@@ -162,8 +162,10 @@ if uploaded_file is not None:
         healthy_prob = float(preds[0][1]) 
         threshold = 0.5 
         if healthy_prob >= threshold: 
-            label = "Abnormal" confidence = healthy_prob 
-        else: label = "Healthy" 
+            label = "Abnormal" 
+            confidence = healthy_prob 
+        else: 
+            label = "Healthy" 
             confidence = abnormal_prob 
         st.audio(uploaded_file, format="audio/wav") 
         st.success(f"Prediction: **{label}**")
