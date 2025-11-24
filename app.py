@@ -5,7 +5,8 @@ import librosa
 import google.generativeai as genai
 import os
 
-st.title("🩺 Lung Sound Classifier")
+st.title("🩺 Welcome to CoughDetect!")
+st.write("CoughDetect is a simple program to let you know whether your cough is healthy or dangerous in seconds. Just upload the .wav file and get your result and personalized advice here!")
 st.write("Upload a `.wav` file to classify it as **Healthy** or **Abnormal**, then get health tips.")
 
 # -----------------------------
