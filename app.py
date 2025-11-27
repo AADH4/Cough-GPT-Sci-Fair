@@ -171,8 +171,6 @@ if uploaded_file is not None:
             confidence = abnormal_prob 
         st.audio(uploaded_file, format="audio/wav") 
         st.success(f"Prediction: **{label}**")
-        with st.spinner("Generating personalized advice..."): 
-            #advice = get_gemini_advice(label, confidence) 
         st.subheader("🧠 Gemini AI Health Advice")
         st.write("Our analysis indicated an abnormal pattern in your cough recording. It's always a good idea to discuss any persistent or unusual coughs with a healthcare professional to understand the cause and receive personalized advice. In the meantime, ensure you're getting plenty of rest and staying hydrated, and consider over-the-counter remedies for symptom relief if appropriate") 
     except Exception as e: 
