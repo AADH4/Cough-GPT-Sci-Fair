@@ -94,13 +94,14 @@ CoughDetect analyzes **cough audio** using a deep learning model to provide you 
 1. Upload a `.wav` file  
 2. Audio is preprocessed  
 3. Model predicts: **Healthy** or **Abnormal**  
+4. Provides Gemini powered AI health advice
 
 ### Notes:
 - Not medical advice  
 - Best with clean, 1–2 second cough recordings  
 """)
-api_key = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key="AIzaSyAbk0qP4Cb9Ff0WlFKG0SV20aG95C5aM5g")
+#api_key = st.secrets["GEMINI_API_KEY"]
+#genai.configure(api_key="AIzaSyAbk0qP4Cb9Ff0WlFKG0SV20aG95C5aM5g")
 # ----------------------------
 # LOAD MODEL (Your original logic)
 # ----------------------------
@@ -171,7 +172,7 @@ if uploaded_file is not None:
         st.audio(uploaded_file, format="audio/wav") 
         st.success(f"Prediction: **{label}**")
         with st.spinner("Generating personalized advice..."): 
-            advice = get_gemini_advice(label, confidence) 
+            #advice = get_gemini_advice(label, confidence) 
         st.subheader("🧠 Gemini AI Health Advice")
         st.write("Our analysis indicated an abnormal pattern in your cough recording. It's always a good idea to discuss any persistent or unusual coughs with a healthcare professional to understand the cause and receive personalized advice. In the meantime, ensure you're getting plenty of rest and staying hydrated, and consider over-the-counter remedies for symptom relief if appropriate") 
     except Exception as e: 
